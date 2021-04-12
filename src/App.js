@@ -1,8 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 // import * as BooksAPI from './BooksAPI'
 //import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "./App.css";
 import { getAll, update } from "./BooksAPI";
+import BookShelf from "./Components/BookShelf";
 
 class BooksApp extends React.Component {
   constructor(props) {
@@ -106,104 +107,6 @@ class BooksApp extends React.Component {
             </div>
           </div>
         )}
-      </div>
-    );
-  }
-}
-
-class BookShelf extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      booksToShow: [],
-    };
-  }
-
-  async componentDidMount() {
-    let filtBooks = this.props.bookDetails.filter(
-      (bookDetail) => bookDetail.shelf === this.props.shelfTitleProps
-    );
-    this.setState({ booksToShow: filtBooks });
-  }
-  render() {
-    return (
-      <div className="bookshelf">
-        <h2 className="bookshelf-title">{this.props.shelfTitle}</h2>
-        <div className="bookshelf-books">
-          <ol className="books-grid">
-            {this.props.bookDetails
-              .filter(
-                (bookDetail) => bookDetail.shelf === this.props.shelfTitleProps
-              )
-              .map((bookDetail, index) => (
-                <Book
-                  idBook={bookDetail.id}
-                  tit={bookDetail.title}
-                  key={bookDetail.id}
-                  sty={{
-                    width: 148,
-                    height: 174,
-                    backgroundImage:
-                      bookDetail.imageLinks &&
-                      `url('${bookDetail.imageLinks.thumbnail}')`,
-                  }}
-                  shelf={bookDetail.shelf}
-                  auth={bookDetail.authors}
-                  moveBookToShelf={this.props.moveBookToShelf}
-                />
-              ))}
-          </ol>
-        </div>
-      </div>
-    );
-  }
-}
-
-class Book extends Component {
-  render() {
-    return (
-      <li>
-        <div className="book" id={this.props.tit}>
-          <div className="book-top">
-            <div className="book-cover" style={this.props.sty} />
-            <BookShelfChanger
-              changerKey={this.props.idBook}
-              shelf={this.props.shelf}
-              moveBookToShelf={this.props.moveBookToShelf}
-            />
-          </div>
-          <div className="book-title">{this.props.tit}</div>
-          <div className="book-authors">{this.props.auth}</div>
-        </div>
-      </li>
-    );
-  }
-}
-
-class BookShelfChanger extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      shelf: this.props.shelf,
-    };
-    this.eventHandlerForChange = this.eventHandlerForChange.bind(this);
-  }
-  eventHandlerForChange(e) {
-    this.setState({ shelf: e.target.value });
-    this.props.moveBookToShelf(this.props.changerKey, e.target.value);
-  }
-  render() {
-    return (
-      <div className="book-shelf-changer" key={this.props.changerKey}>
-        <select value={this.state.shelf} onChange={this.eventHandlerForChange}>
-          <option value="move" disabled>
-            Move to...
-          </option>
-          <option value="currentlyReading">Currently Reading</option>
-          <option value="wantToRead">Want to Read</option>
-          <option value="read">Read</option>
-          <option value="none">None</option>
-        </select>
       </div>
     );
   }
