@@ -4,7 +4,7 @@ import React from "react";
 import "./App.css";
 import { getAll, update } from "./BooksAPI";
 import BookShelf from "./Components/BookShelf";
-import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
+import { Route, Switch, BrowserRouter as Router, Link } from "react-router-dom";
 class BooksApp extends React.Component {
   constructor(props) {
     super(props);
@@ -36,6 +36,7 @@ class BooksApp extends React.Component {
     let newUpdatedBooks = [...allBooksExceptCurrentBook, actualBook];
     this.setState({ books: newUpdatedBooks });
   };
+
   async componentDidMount() {
     let allBooks = await getAll();
     this.setState({
@@ -76,23 +77,17 @@ class BooksApp extends React.Component {
                   />
                 </div>
               </div>
-              <div className="open-search">
-                <button onClick={() => this.setState({ showSearchPage: true })}>
-                  Add a book
-                </button>
-              </div>
+              {/* <div className="open-search">
+                <button onClick={() => this.startSearch()}>Add a book</button>
+              </div> */}
+              <StartSearch />
             </div>
           </Route>
           <Route path="/search">
             <div className="app">
               <div className="search-books">
                 <div className="search-books-bar">
-                  <button
-                    className="close-search"
-                    onClick={() => this.setState({ showSearchPage: false })}
-                  >
-                    Close
-                  </button>
+                  <CloseSearchButton />
                   <div className="search-books-input-wrapper">
                     {/*
                   NOTES: The search from BooksAPI is limited to a particular set of search terms.
@@ -119,5 +114,22 @@ class BooksApp extends React.Component {
     );
   }
 }
+
+let StartSearch = () => {
+  return (
+    <div className="open-search">
+      <Link to="search">
+        <button>Add a Book</button>
+      </Link>
+    </div>
+  );
+};
+let CloseSearchButton = () => {
+  return (
+    <Link to="/">
+      <button className="close-search">Close</button>
+    </Link>
+  );
+};
 
 export default BooksApp;
