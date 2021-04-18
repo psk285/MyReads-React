@@ -74,7 +74,8 @@ class BooksApp extends React.Component {
       });
     }
   }
-  resetSearch = async () => {
+  resetSearch = () => {
+    console.log(this);
     this.setState({ searchedBooks: [], inputValue: "" });
     ls.set("searchedBooks", []);
     ls.set("inputValue", "");
@@ -86,15 +87,18 @@ class BooksApp extends React.Component {
       return;
     }
     let searchedBooksOutput = await search(this.state.inputValue);
-    if (searchedBooksOutput !== []) {
+    console.log(searchedBooksOutput);
+    if (searchedBooksOutput.error) {
+      return;
+    }
+    //console.log(searchedBooksOutput);
+    if (searchedBooksOutput !== undefined || searchedBooksOutput.length !== 0) {
       [...searchedBooksOutput].forEach((sb) => {
         if (!sb.shelf) {
           sb.shelf = "none";
         }
       });
     }
-
-    //console.log(searchedBooksOutput);
     this.setState({ searchedBooks: searchedBooksOutput });
     ls.set("searchedBooks", searchedBooksOutput);
   };
@@ -144,9 +148,6 @@ class BooksApp extends React.Component {
                   />
                 </div>
               </div>
-              {/* <div className="open-search">
-                <button onClick={() => this.startSearch()}>Add a book</button>
-              </div> */}
               <StartSearch />
             </div>
           </Route>
@@ -154,7 +155,11 @@ class BooksApp extends React.Component {
             <div className="app">
               <div className="search-books">
                 <div className="search-books-bar">
-                  <CloseSearchButton onChange={this.resetSearch} />
+                  <Link to="/">
+                    <button className="close-search" onClick={this.resetSearch}>
+                      Close
+                    </button>
+                  </Link>
                   <div className="search-books-input-wrapper">
                     {/*
                   NOTES: The search from BooksAPI is limited to a particular set of search terms.
@@ -174,11 +179,12 @@ class BooksApp extends React.Component {
                 </div>
                 <div className="search-books-results">
                   <BookShelf
-                    shelfTitle="None"
-                    shelfTitleProps="none"
+                    shelfTitle="All"
+                    shelfTitleProps="all"
                     bookDetails={this.state.searchedBooks}
                     moveBookToShelf={this.moveBookToShelf}
                     key={this.state.searchedBooks.id}
+                    iv={ls.get("inputValue")}
                   />
                 </div>
               </div>
