@@ -5,3 +5,5 @@ npm install local-storage --save
 Steps to run the project:
 npm install
 npm start
+
+All functionalities required in Rubric are achieved

@@ -20,14 +20,6 @@ export default class BookShelf extends Component {
     }
   }
   render() {
-    // if (this.props.shelfTitle === "All") {
-    //   this.setState({ isAll: this.props.bookDetails });
-    // }else{
-    //   this.setState({isAll: this.props.bookDetails
-    //     .filter(
-    //       (bookDetail) => bookDetail.shelf === this.props.shelfTitleProps
-    //     )})
-    // }
     return (
       <div className="bookshelf">
         {this.props.shelfTitle !== "All" && (
