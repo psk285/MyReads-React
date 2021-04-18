@@ -5,6 +5,7 @@ import "./App.css";
 import { getAll, update, search } from "./BooksAPI";
 import BookShelf from "./Components/BookShelf";
 import { Route, Switch, BrowserRouter as Router, Link } from "react-router-dom";
+import ls from "local-storage";
 class BooksApp extends React.Component {
   constructor(props) {
     super(props);
@@ -33,21 +34,19 @@ class BooksApp extends React.Component {
     if (actualBook.length > 0) {
       let actBook = actualBook[0];
       actBook.shelf = nextShelf;
-      //console.log(actualBook);
       let allBooksExceptCurrentBook = this.state.books.filter(
         (b) => b.id !== book
       );
       newUpdatedBooks = [...allBooksExceptCurrentBook, actBook];
       this.setState({ books: newUpdatedBooks });
+      ls.set("books", newUpdatedBooks);
     } else {
       let actualBookNew = this.state.searchedBooks.filter(
         (bo) => bo.id === book
       )[0];
       console.log(actualBookNew);
       if (actualBookNew !== null) {
-        //console.log(actualBookNew);
         actualBookNew.shelf = nextShelf;
-        //console.log(actualBook);
         let allBooksExceptCurrentBook = this.state.books.filter(
           (b) => b.id !== book
         );
@@ -57,23 +56,33 @@ class BooksApp extends React.Component {
           newUpdatedBooks = [...this.state.books, actualBookNew];
         }
         this.setState({ books: newUpdatedBooks });
+        ls.set("books", newUpdatedBooks);
       }
-      this.setState({ books: newUpdatedBooks });
     }
   };
 
   async componentDidMount() {
     let allBooks = await getAll();
-    this.setState({
-      books: allBooks,
-    });
+    let allBooksCheck = ls.get("books") || [];
+    if (allBooksCheck.length > allBooks.length) {
+      this.setState({
+        books: allBooksCheck,
+      });
+    } else {
+      this.setState({
+        books: allBooks,
+      });
+    }
   }
   resetSearch = async () => {
     this.setState({ searchedBooks: [], inputValue: "" });
+    ls.set("searchedBooks", []);
+    ls.set("inputValue", "");
   };
   searchBooks = async () => {
     if (this.state.inputValue.length === 0) {
       this.setState({ searchedBooks: [] });
+      ls.set("searchedBooks", []);
       return;
     }
     let searchedBooksOutput = await search(this.state.inputValue);
@@ -87,13 +96,19 @@ class BooksApp extends React.Component {
 
     //console.log(searchedBooksOutput);
     this.setState({ searchedBooks: searchedBooksOutput });
+    ls.set("searchedBooks", searchedBooksOutput);
   };
   eventHandlerInputChange = (e) => {
     let origValue = e.target.value;
-    if (origValue === "") this.setState({ searchedBooks: [], inputValue: "" });
+    if (origValue === "") {
+      this.setState({ searchedBooks: [], inputValue: "" });
+      ls.set("searchedBooks", []);
+      ls.set("inputValue", "");
+    }
     this.setState({ inputValue: origValue }, () => {
       this.searchBooks(origValue);
     });
+    ls.set("inputValue", origValue);
   };
   render() {
     return (
