@@ -80,6 +80,8 @@ class BooksApp extends React.Component {
     let searchedBooksOutput = await search(this.state.inputValue);
     console.log(searchedBooksOutput);
     if (searchedBooksOutput.error) {
+      this.setState({ searchedBooks: [] });
+      ls.set("searchedBooks", []);
       return;
     }
     //console.log(searchedBooksOutput);
