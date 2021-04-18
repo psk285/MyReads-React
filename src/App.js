@@ -2,7 +2,7 @@ import React from "react";
 // import * as BooksAPI from './BooksAPI'
 //import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "./App.css";
-import { getAll, update } from "./BooksAPI";
+import { getAll, update, search } from "./BooksAPI";
 import BookShelf from "./Components/BookShelf";
 import { Route, Switch, BrowserRouter as Router, Link } from "react-router-dom";
 class BooksApp extends React.Component {
@@ -17,6 +17,8 @@ class BooksApp extends React.Component {
        */
 
       books: [],
+      inputValue: "",
+      searchedBooks: [],
     };
   }
 
@@ -25,16 +27,39 @@ class BooksApp extends React.Component {
     let nextShelf = shelf;
     if (prevShelf === nextShelf) return;
     update(book, nextShelf);
-    console.log(book, shelf);
-    let actualBook = this.state.books.filter((bo) => bo.id === book)[0];
+    let actualBook = this.state.books.filter((bo) => bo.id === book);
     console.log(actualBook);
-    actualBook.shelf = nextShelf;
-    //console.log(actualBook);
-    let allBooksExceptCurrentBook = this.state.books.filter(
-      (b) => b.id !== book
-    );
-    let newUpdatedBooks = [...allBooksExceptCurrentBook, actualBook];
-    this.setState({ books: newUpdatedBooks });
+    let newUpdatedBooks = [];
+    if (actualBook.length > 0) {
+      let actBook = actualBook[0];
+      actBook.shelf = nextShelf;
+      //console.log(actualBook);
+      let allBooksExceptCurrentBook = this.state.books.filter(
+        (b) => b.id !== book
+      );
+      newUpdatedBooks = [...allBooksExceptCurrentBook, actBook];
+      this.setState({ books: newUpdatedBooks });
+    } else {
+      let actualBookNew = this.state.searchedBooks.filter(
+        (bo) => bo.id === book
+      )[0];
+      console.log(actualBookNew);
+      if (actualBookNew !== null) {
+        //console.log(actualBookNew);
+        actualBookNew.shelf = nextShelf;
+        //console.log(actualBook);
+        let allBooksExceptCurrentBook = this.state.books.filter(
+          (b) => b.id !== book
+        );
+        if (allBooksExceptCurrentBook.length !== this.state.books.length) {
+          newUpdatedBooks = [...allBooksExceptCurrentBook, actualBookNew];
+        } else {
+          newUpdatedBooks = [...this.state.books, actualBookNew];
+        }
+        this.setState({ books: newUpdatedBooks });
+      }
+      this.setState({ books: newUpdatedBooks });
+    }
   };
 
   async componentDidMount() {
@@ -43,6 +68,33 @@ class BooksApp extends React.Component {
       books: allBooks,
     });
   }
+  resetSearch = async () => {
+    this.setState({ searchedBooks: [], inputValue: "" });
+  };
+  searchBooks = async () => {
+    if (this.state.inputValue.length === 0) {
+      this.setState({ searchedBooks: [] });
+      return;
+    }
+    let searchedBooksOutput = await search(this.state.inputValue);
+    if (searchedBooksOutput !== []) {
+      [...searchedBooksOutput].forEach((sb) => {
+        if (!sb.shelf) {
+          sb.shelf = "none";
+        }
+      });
+    }
+
+    //console.log(searchedBooksOutput);
+    this.setState({ searchedBooks: searchedBooksOutput });
+  };
+  eventHandlerInputChange = (e) => {
+    let origValue = e.target.value;
+    if (origValue === "") this.setState({ searchedBooks: [], inputValue: "" });
+    this.setState({ inputValue: origValue }, () => {
+      this.searchBooks(origValue);
+    });
+  };
   render() {
     return (
       <Router>
@@ -87,7 +139,7 @@ class BooksApp extends React.Component {
             <div className="app">
               <div className="search-books">
                 <div className="search-books-bar">
-                  <CloseSearchButton />
+                  <CloseSearchButton onChange={this.resetSearch} />
                   <div className="search-books-input-wrapper">
                     {/*
                   NOTES: The search from BooksAPI is limited to a particular set of search terms.
@@ -99,12 +151,20 @@ class BooksApp extends React.Component {
                 */}
                     <input
                       type="text"
+                      value={this.state.inputValue}
+                      onChange={this.eventHandlerInputChange}
                       placeholder="Search by title or author"
                     />
                   </div>
                 </div>
                 <div className="search-books-results">
-                  <ol className="books-grid" />
+                  <BookShelf
+                    shelfTitle="None"
+                    shelfTitleProps="none"
+                    bookDetails={this.state.searchedBooks}
+                    moveBookToShelf={this.moveBookToShelf}
+                    key={this.state.searchedBooks.id}
+                  />
                 </div>
               </div>
             </div>
@@ -115,7 +175,7 @@ class BooksApp extends React.Component {
   }
 }
 
-let StartSearch = () => {
+let StartSearch = (props) => {
   return (
     <div className="open-search">
       <Link to="search">
@@ -124,10 +184,12 @@ let StartSearch = () => {
     </div>
   );
 };
-let CloseSearchButton = () => {
+let CloseSearchButton = (props) => {
   return (
     <Link to="/">
-      <button className="close-search">Close</button>
+      <button className="close-search" onClick={props.resetSearch}>
+        Close
+      </button>
     </Link>
   );
 };

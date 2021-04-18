@@ -17,7 +17,9 @@ export default class BookShelf extends Component {
   render() {
     return (
       <div className="bookshelf">
-        <h2 className="bookshelf-title">{this.props.shelfTitle}</h2>
+        {this.props.shelfTitle !== "None" && (
+          <h2 className="bookshelf-title">{this.props.shelfTitle}</h2>
+        )}
         <div className="bookshelf-books">
           <ol className="books-grid">
             {this.props.bookDetails
@@ -37,7 +39,7 @@ export default class BookShelf extends Component {
                       `url('${bookDetail.imageLinks.thumbnail}')`,
                   }}
                   shelf={bookDetail.shelf}
-                  auth={bookDetail.authors}
+                  auth={bookDetail.authors && bookDetail.authors.join(", ")}
                   moveBookToShelf={this.props.moveBookToShelf}
                 />
               ))}
